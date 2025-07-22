@@ -2,6 +2,7 @@ package com.example.paginacja.demo;
 
 import com.example.paginacja.demo.model.Order;
 import com.example.paginacja.demo.model.OrderItem;
+import com.example.paginacja.demo.repository.OrderItemRepository;
 import com.example.paginacja.demo.repository.OrderRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;

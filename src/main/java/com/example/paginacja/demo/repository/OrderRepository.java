@@ -1,7 +1,7 @@
 package com.example.paginacja.demo.repository;
 
 import com.example.paginacja.demo.model.Order;
-import com.example.paginacja.demo.model.OrderItem;
+import com.example.paginacja.demo.model.dto.OrderProjection;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -10,23 +10,33 @@ import org.springframework.data.jpa.repository.Query;
 public interface OrderRepository extends JpaRepository<Order, Long> {
     @Query(
             value = """
-        SELECT 
-          o.id      AS id,
-          o.customer
-        FROM orders o
-        LEFT JOIN order_items i
-          ON i.order_id = o.id
-        GROUP BY 
-          o.id,
-          o.customer
-      """,
-            countQuery = """
-        SELECT COUNT(*) 
-          FROM orders
-      """,
+      SELECT 
+        o.id           AS id,
+        o.customer     AS customer,
+        COUNT(i.id)    AS orderCount
+      FROM orders o
+      LEFT JOIN order_items i
+        ON i.order_id = o.id
+      GROUP BY 
+        o.id,
+        o.customer
+    """,
+            countQuery = "SELECT COUNT(*) FROM orders",
             nativeQuery = true
     )
-    Page<Order> findAll(Pageable pageable);
+    Page<OrderProjection> findAllByProjection(Pageable pageable);
+
+    @Query(
+            value = """
+                      SELECT DISTINCT o
+                      FROM Order o
+                      LEFT JOIN FETCH o.items
+                    """,
+            countQuery = "SELECT COUNT(o) FROM Order o"
+    )
+    Page<Order> findAllWithItems(Pageable pageable);  //HHH90003004: firstResult/maxResults specified with collection fetch; applying in memory
+
+
 }
 
 /*
